@@ -1,5 +1,6 @@
 import streamlit as st
-
+import met_api
+import pandas as pd
 # Page setup
 st.set_page_config(page_title="The METrics", layout="centered")
 
@@ -61,6 +62,25 @@ st.markdown("""
            style="padding: 10px; width: 250px; border-radius: 20px; border: 1px solid #ccc;">
 </div>
 """, unsafe_allow_html=True)
+
+# Department analytic
+st.write("")
+st.subheader("Departments for your search")
+
+query = st.text_input("Search term (for images only)", value="cats", key="dept_query")
+max_ids = st.slider("How many results to analyze", 20, 400, 150, 10, key="dept_max")
+
+if st.button("Run department analytic", key="dept_run"):
+    with st.spinner("Fetching and tallying departments…"):
+        rows = met_api.department_counts(q=query, max_ids=max_ids)
+
+    if not rows:
+        st.info("No results found (or the API call failed). Try another term.")
+    else:
+        df = pd.DataFrame(rows, columns=["Department", "Count"])
+        # show a quick bar chart + table
+        st.bar_chart(df.set_index("Department"))
+        st.dataframe(df, use_container_width=True)
 
 st.write("")
 
