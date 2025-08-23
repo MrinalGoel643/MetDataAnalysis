@@ -23,13 +23,11 @@ def get_images(totalObjects, objectIDs, limit):
     images = []
     # grabbing extra in case a primary image is blank (Works best on small limits)
     rand_indexes = random.sample(range(totalObjects), limit + 20)
-    counter = 0
     for i in rand_indexes:
         obj = get_object(objectIDs[i])
         if obj["primaryImage"]:
             images.append((obj["primaryImage"], obj["title"]))
-            counter += 1
-        if counter == limit:
+        if len(images) == limit:
             break
 
     return images
