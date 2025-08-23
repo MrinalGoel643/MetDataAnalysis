@@ -18,18 +18,18 @@ def get_objectsWithImages():
     objectIDs = response["objectIDs"]
     return total, objectIDs
 
-# gets the urls for 3 random objects with images
+# gets the urls for random objects with images
 def get_images(totalObjects, objectIDs, limit):
     images = []
     # grabbing extra in case a primary image is blank (Works best on small limits)
     rand_indexes = random.sample(range(totalObjects), limit + 20)
-
+    counter = 0
     for i in rand_indexes:
         obj = get_object(objectIDs[i])
         if obj["primaryImage"]:
             images.append((obj["primaryImage"], obj["title"]))
-            limit += 1
-        if limit == 3:
+            counter += 1
+        if counter == limit:
             break
 
     return images
