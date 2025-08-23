@@ -45,8 +45,8 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-total, ids = get_objectsWithImages()
-images = get_images(total, ids, limit=3)
+total, ids = cache_objectsWithImages()
+images = cache_images(total, ids, limit=3)
 
 
 if images:
