@@ -1,12 +1,18 @@
 import streamlit as st
-import met_api
 import pandas as pd
-
-from met_api import search_for_images
+from met_api import search_for_images, get_objectsWithImages, get_images
 
 @st.cache_data
 def cached_search_for_images(query):
     return search_for_images(query, 2,departments=[1,3,4,5,6,7])
+
+@st.cache_data
+def cache_objectsWithImages():
+    return get_objectsWithImages()
+
+@st.cache_data
+def cache_images(total, objectIDs, limit):
+    return get_images(total, objectIDs, limit)
 
 # Page setup
 st.set_page_config(page_title="The METrics", layout="centered")
@@ -40,6 +46,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 # Columns with fixed-height images
 col1, col2, col3 = st.columns(3)
@@ -87,7 +94,7 @@ st.write("")
 # Search bar
 st.markdown("""
 <div style='display: flex; justify-content: center;'>
-    <input type="text" placeholder=" 🔎  Search Met's Art Collection...." 
+    <input type="text" placeholder=" 🔎  Search Met's Art Collection...."
            style="padding: 10px; width: 250px; border-radius: 20px; border: 1px solid #ccc;">
 </div>
 """, unsafe_allow_html=True)
@@ -116,7 +123,7 @@ st.write("")
 # Footer
 st.markdown("""
 <div style='position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 12px;'>
-    <span style="font-size: 14px;">ℹ️ Met API and data related information is available at – 
+    <span style="font-size: 14px;">ℹ️ Met API and data related information is available at –
     <a href="https://metmuseum.github.io/" target="_blank">https://metmuseum.github.io/</a></span>
 </div>
 """, unsafe_allow_html=True)
