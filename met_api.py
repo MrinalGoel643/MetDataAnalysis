@@ -31,3 +31,31 @@ def get_images(totalObjects, objectIDs, limit):
             break
 
     return images
+
+def department_counts(q="*", max_ids=200):
+    """
+    Analytic: return a list of (department, count) for search results.
+    - q: search query (default '*' = anything)
+    - max_ids: cap how many object IDs to inspect (keeps it fast)
+
+    Uses the Met search endpoint (images only), then tallies the 'department'
+    field from each object's metadata.
+    """
+    try:
+        resp = requests.get(f"{URL}search", params={"q": q, "hasImages": True}, timeout=15)
+        resp.raise_for_status()
+        ids = (resp.json().get("objectIDs") or [])[:max_ids]
+    except Exception:
+        return []
+
+    counts = {}
+    for oid in ids:
+        try:
+            obj = get_object(oid)  # uses your existing helper
+            dep = obj.get("department") or "(unknown)"
+            counts[dep] = counts.get(dep, 0) + 1
+        except Exception:
+            continue
+
+    # return sorted (department, count) pairs, highest first
+    return sorted(counts.items(), key=lambda x: x[1], reverse=True)
