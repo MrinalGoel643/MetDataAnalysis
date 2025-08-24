@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from met_api import search_for_images, get_objectsWithImages, get_images
+from met_api import search_for_images, get_objectsWithImages, get_images, department_counts
 
 @st.cache_data
 def cached_search_for_images(query):
@@ -51,7 +51,7 @@ st.markdown(
 # Columns with fixed-height images
 col1, col2, col3 = st.columns(3)
 
-q = st.text_input("Search term (for images only)", value="UFO", key="search_query")
+q = st.text_input("🔎  Search Met's Art Collection....",value="UFO", key="search_query")
 
 r = cached_search_for_images(q)
 
@@ -91,13 +91,6 @@ with col3:
 
 st.write("")
 st.write("")
-# Search bar
-st.markdown("""
-<div style='display: flex; justify-content: center;'>
-    <input type="text" placeholder=" 🔎  Search Met's Art Collection...."
-           style="padding: 10px; width: 250px; border-radius: 20px; border: 1px solid #ccc;">
-</div>
-""", unsafe_allow_html=True)
 
 # Department analytic
 st.write("")
@@ -108,7 +101,7 @@ max_ids = st.slider("How many results to analyze", 20, 400, 150, 10, key="dept_m
 
 if st.button("Run department analytic", key="dept_run"):
     with st.spinner("Fetching and tallying departments…"):
-        rows = met_api.department_counts(q=query, max_ids=max_ids)
+        rows = department_counts(q=query, max_ids=max_ids)
 
     if not rows:
         st.info("No results found (or the API call failed). Try another term.")
