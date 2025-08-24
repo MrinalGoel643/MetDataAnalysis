@@ -1,4 +1,16 @@
 import streamlit as st
+from met_api import get_objectsWithImages, get_images
+
+# Caching Section
+@st.cache_data
+def cache_objectsWithImages():
+    return get_objectsWithImages()
+
+@st.cache_data
+def cache_images(total, objectIDs, limit):
+    return get_images(total, objectIDs, limit)
+
+
 
 # Page setup
 st.set_page_config(page_title="The METrics", layout="centered")
@@ -33,31 +45,39 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Columns with fixed-height images
-col1, col2, col3 = st.columns(3)
+total, ids = cache_objectsWithImages()
+images = cache_images(total, ids, limit=3)
 
-with col1:
-    st.markdown(
-        "<div class='img-box'><img src='https://images.metmuseum.org/CRDImages/ep/web-large/DP-29324-001.jpg'></div>",
-        unsafe_allow_html=True
-    )
-with col2:
-    st.markdown(
-        "<div class='img-box'><img src='https://images.metmuseum.org/CRDImages/ad/web-large/DP124705.jpg'></div>",
-        unsafe_allow_html=True
-    )
-with col3:
-    st.markdown(
-        "<div class='img-box'><img src='https://images.metmuseum.org/CRDImages/gr/web-large/DP21847edited.jpg'></div>",
-        unsafe_allow_html=True
-    )
+
+if images:
+    # Columns with fixed-height images
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown(
+            f"<div class='img-box'><img src='{images[0][0]}'></div>",
+            unsafe_allow_html=True
+        )
+        st.markdown(f"<div>{images[0][1]}</div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown(
+            f"<div class='img-box'><img src='{images[1][0]}'></div>",
+            unsafe_allow_html=True
+        )
+        st.markdown(f"<div>{images[1][1]}</div>", unsafe_allow_html=True)
+    with col3:
+        st.markdown(
+            f"<div class='img-box'><img src='{images[2][0]}'></div>",
+            unsafe_allow_html=True
+        )
+        st.markdown(f"<div>{images[2][1]}</div>", unsafe_allow_html=True)
 
 st.write("")
 st.write("")
 # Search bar
 st.markdown("""
 <div style='display: flex; justify-content: center;'>
-    <input type="text" placeholder=" 🔎  Search Met's Art Collection...." 
+    <input type="text" placeholder=" 🔎  Search Met's Art Collection...."
            style="padding: 10px; width: 250px; border-radius: 20px; border: 1px solid #ccc;">
 </div>
 """, unsafe_allow_html=True)
@@ -67,7 +87,7 @@ st.write("")
 # Footer
 st.markdown("""
 <div style='position: fixed; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 12px;'>
-    <span style="font-size: 14px;">ℹ️ Met API and data related information is available at – 
+    <span style="font-size: 14px;">ℹ️ Met API and data related information is available at –
     <a href="https://metmuseum.github.io/" target="_blank">https://metmuseum.github.io/</a></span>
 </div>
 """, unsafe_allow_html=True)
