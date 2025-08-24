@@ -1,5 +1,7 @@
+import time
 import requests
 import random
+import pandas as pd
 
 URL = "https://collectionapi.metmuseum.org/public/collection/v1/"
 
@@ -59,3 +61,124 @@ def department_counts(q="*", max_ids=200):
 
     # return sorted (department, count) pairs, highest first
     return sorted(counts.items(), key=lambda x: x[1], reverse=True)
+
+"""
+Get a list of departments
+"""
+def list_met_departments():
+    """
+    Return a DataFrame of all Met departments (id + name) to help you choose.
+    """
+    r = requests.get(f"{URL}/departments")
+    r.raise_for_status()
+    depts = r.json().get("departments", [])
+    return pd.DataFrame(depts)[["departmentId", "displayName"]]
+
+"""
+returns a dataframe of list of objects with images and metadata that matches search term
+To be polite, will only get default max 5 random results from each department,
+but can be specified as parameter. Also, can choose the departments to search from.
+"""
+def search_for_images(query,
+                    max_per_department=5,
+                    departments=None):
+
+    if not query or not query.strip():
+        raise ValueError("Please provide a query.")
+
+    # 1) Departments
+    if departments is None:
+        resp = requests.get(f"{URL}/departments")
+        resp.raise_for_status()
+        dept_list = resp.json().get("departments", [])
+        dept_ids = [d["departmentId"] for d in dept_list]
+        dept_id_to_name = {d["departmentId"]: d["displayName"] for d in dept_list}
+    else:
+        dept_ids = list(departments)
+        # Names will be filled from object details; provide a generic fallback
+        dept_id_to_name = {d: f"Department {d}" for d in dept_ids}
+
+    # 2) Per-department search → random sample of IDs → fetch details
+    rows = []
+    #session = requests.Session()
+
+    print("Searching for", query)
+    print("Departments:", dept_ids)
+
+    for dept_id in dept_ids:
+        # limit to only those with images and is highlighted
+        params = {
+            "q": query,
+            "hasImages": "true",
+            #"isHighlight": "true",
+            "departmentId": dept_id,
+        }
+        try:
+            r = requests.get(f"{URL}/search", params=params)
+            #print(r.url)
+            r.raise_for_status()
+        except requests.RequestException:
+            continue
+
+        object_ids = (r.json() or {}).get("objectIDs") or []
+        if not object_ids:
+            continue
+
+        sample_ids = random.sample(object_ids, k=min(max_per_department, len(object_ids)))
+
+        for oid in sample_ids:
+            #print(f"Found: {oid}")
+            try:
+                obj = requests.get(f"{URL}/objects/{oid}").json()
+            except requests.RequestException:
+                continue
+
+            # skip if no image
+            if not obj["primaryImage"]:
+                continue
+
+            rows.append({
+                "objectID": obj.get("objectID"),
+                "title": obj.get("title"),
+                "artistDisplayName": obj.get("artistDisplayName"),
+                "objectDate": obj.get("objectDate"),
+                "culture": obj.get("culture"),
+                "medium": obj.get("medium"),
+                "department": obj.get("department") or dept_id_to_name.get(dept_id),
+                "objectName": obj.get("objectName"),
+                "classification": obj.get("classification"),
+                "primaryImageSmall": obj.get("primaryImageSmall"),
+                "primaryImage": obj.get("primaryImage"),
+                "objectURL": obj.get("objectURL"),
+                "isPublicDomain": obj.get("isPublicDomain"),
+            })
+
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df = df.sort_values(["department", "title"]).reset_index(drop=True)
+    return df
+
+"""
+    CLI when run from command line
+    Displays the departments to allow user to input a department
+    Then searches the department based on input, and displays the results with images.
+"""
+def main():
+    print("Welcome to Met Search")
+    departments = list_met_departments()
+    print(departments.to_string(index=False))
+    random.seed(time.time())
+    while True:
+        dept_no = input("Choose a departmentId #: (or enter for all)").strip()
+        if dept_no == '':
+            dept = None
+        else:
+            dept = [int(dept_no)]
+        results = search_for_images(input("Search the Met for: "),2, departments=dept)
+        if results.empty:
+            print("No results found.")
+            continue
+        print(results.to_string(index=False))
+
+if __name__ == '__main__':
+    main()
