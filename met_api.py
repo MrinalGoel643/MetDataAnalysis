@@ -148,7 +148,7 @@ def search_for_images(query,
                 "objectName": obj.get("objectName"),
                 "classification": obj.get("classification"),
                 "primaryImageSmall": obj.get("primaryImageSmall"),
-                #"primaryImage": obj.get("primaryImage"),
+                "primaryImage": obj.get("primaryImage"),
                 "objectURL": obj.get("objectURL"),
                 "isPublicDomain": obj.get("isPublicDomain"),
             })
@@ -163,7 +163,7 @@ def search_for_images(query,
     Displays the departments to allow user to input a department
     Then searches the department based on input, and displays the results with images.
 """
-if __name__ == '__main__':
+def main():
     print("Welcome to Met Search")
     departments = list_met_departments()
     print(departments.to_string(index=False))
@@ -179,3 +179,6 @@ if __name__ == '__main__':
             print("No results found.")
             continue
         print(results.to_string(index=False))
+
+if __name__ == '__main__':
+    main()

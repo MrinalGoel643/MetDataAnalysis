@@ -1,6 +1,13 @@
 import streamlit as st
 import met_api
 import pandas as pd
+
+from met_api import search_for_images
+
+@st.cache_data
+def cached_search_for_images(query):
+    return search_for_images(query, 2,departments=[1,3,4,5,6,7])
+
 # Page setup
 st.set_page_config(page_title="The METrics", layout="centered")
 
@@ -36,6 +43,28 @@ st.markdown(
 
 # Columns with fixed-height images
 col1, col2, col3 = st.columns(3)
+
+q = st.text_input("Search term (for images only)", value="UFO", key="search_query")
+
+r = cached_search_for_images(q)
+
+summary = r[["primaryImageSmall","title","department","objectName"]]
+
+config = {
+    "primaryImageSmall": st.column_config.ImageColumn(),
+}
+
+event = st.dataframe(summary, column_config=config, use_container_width=True, on_select="rerun", selection_mode="single-row")
+
+if event.selection.rows:
+    selected_index = event.selection.rows[0] # Get the index of the first selected row
+    selected_row_data = r.iloc[selected_index]
+
+    st.subheader("Details of Selected Row:")
+    st.image(selected_row_data["primaryImage"], caption=selected_row_data["title"], width=500)
+    st.write(selected_row_data)
+else:
+    st.info("Select a row in the table to see its details.")
 
 with col1:
     st.markdown(
