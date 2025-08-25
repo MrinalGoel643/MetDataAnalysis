@@ -103,7 +103,7 @@ def search_for_images(query,
     #session = requests.Session()
 
     print("Searching for", query)
-    print("Departments:", dept_ids)
+    print("Across departments:", dept_ids)
 
     for dept_id in dept_ids:
         # limit to only those with images and is highlighted
@@ -174,7 +174,11 @@ def main():
             dept = None
         else:
             dept = [int(dept_no)]
-        results = search_for_images(input("Search the Met for: "),2, departments=dept)
+        query = input("Search the Met for: ").strip()
+        if query == '':
+            print("Please enter a query.")
+            continue
+        results = search_for_images(query,2, departments=dept)
         if results.empty:
             print("No results found.")
             continue

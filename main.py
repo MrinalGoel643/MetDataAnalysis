@@ -4,7 +4,7 @@ from met_api import search_for_images, get_objectsWithImages, get_images, depart
 
 @st.cache_data
 def cached_search_for_images(query):
-    return search_for_images(query, 2,departments=[1,3,4,5,6,7])
+    return search_for_images(query, 2)
 
 @st.cache_data
 def cache_objectsWithImages():
@@ -47,71 +47,71 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+tab1, tab2, tab3 = st.tabs(["Random", "Search and Browse", "Dept Analytics"])
 
-# Columns with fixed-height images
-col1, col2, col3 = st.columns(3)
+with tab1:
+    st.write("TBD")
+    total, ids = cache_objectsWithImages()
+    st.write(f"There are {total} images in the Met collection\nHere are 3 random ones for your enjoyment...")
 
-q = st.text_input("🔎  Search Met's Art Collection....",value="UFO", key="search_query")
+    imgs = cache_images(total, ids, 3)
 
-r = cached_search_for_images(q)
+    col1, col2, col3 = st.columns(3)
 
-summary = r[["primaryImageSmall","title","department","objectName"]]
+    with col1:
+        st.image(imgs[0][0])
+        st.write(imgs[0][1])
+    with col2:
+        st.image(imgs[1][0])
+        st.write(imgs[1][1])
+    with col3:
+        st.image(imgs[2][0])
+        st.write(imgs[2][1])
 
-config = {
-    "primaryImageSmall": st.column_config.ImageColumn(),
-}
 
-event = st.dataframe(summary, column_config=config, use_container_width=True, on_select="rerun", selection_mode="single-row")
+with tab2:
+    q = st.text_input("🔎  Search Met's Art Collection....",value="cats", key="search_query")
 
-if event.selection.rows:
-    selected_index = event.selection.rows[0] # Get the index of the first selected row
-    selected_row_data = r.iloc[selected_index]
+    r = cached_search_for_images(q)
 
-    st.subheader("Details of Selected Row:")
-    st.image(selected_row_data["primaryImage"], caption=selected_row_data["title"], width=500)
-    st.write(selected_row_data)
-else:
-    st.info("Select a row in the table to see its details.")
-
-with col1:
-    st.markdown(
-        "<div class='img-box'><img src='https://images.metmuseum.org/CRDImages/ep/web-large/DP-29324-001.jpg'></div>",
-        unsafe_allow_html=True
-    )
-with col2:
-    st.markdown(
-        "<div class='img-box'><img src='https://images.metmuseum.org/CRDImages/ad/web-large/DP124705.jpg'></div>",
-        unsafe_allow_html=True
-    )
-with col3:
-    st.markdown(
-        "<div class='img-box'><img src='https://images.metmuseum.org/CRDImages/gr/web-large/DP21847edited.jpg'></div>",
-        unsafe_allow_html=True
-    )
-
-st.write("")
-st.write("")
-
-# Department analytic
-st.write("")
-st.subheader("Departments for your search")
-
-query = st.text_input("Search term (for images only)", value="cats", key="dept_query")
-max_ids = st.slider("How many results to analyze", 20, 400, 150, 10, key="dept_max")
-
-if st.button("Run department analytic", key="dept_run"):
-    with st.spinner("Fetching and tallying departments…"):
-        rows = department_counts(q=query, max_ids=max_ids)
-
-    if not rows:
-        st.info("No results found (or the API call failed). Try another term.")
+    if r.empty:
+        st.write("No results found.")
     else:
-        df = pd.DataFrame(rows, columns=["Department", "Count"])
-        # show a quick bar chart + table
-        st.bar_chart(df.set_index("Department"))
-        st.dataframe(df, use_container_width=True)
+        summary = r[["primaryImageSmall","title","department","objectName"]]
+        config = {
+            "primaryImageSmall": st.column_config.ImageColumn(),
+        }
+        event = st.dataframe(summary, column_config=config, use_container_width=True, on_select="rerun", selection_mode="single-row")
+        if event.selection.rows:
+            selected_index = event.selection.rows[0] # Get the index of the first selected row
+            selected_row_data = r.iloc[selected_index]
 
-st.write("")
+            st.subheader("Details of Selected Piece:")
+            st.image(selected_row_data["primaryImage"], caption=selected_row_data["title"], width=500)
+            st.write(selected_row_data)
+        else:
+            st.info("Select a row in the table to see its details.")
+
+with tab3:
+    # Department analytic
+    st.write("")
+    st.subheader("Departments for your search")
+
+    query = st.text_input("Search term (for images only)", value="cats", key="dept_query")
+    max_ids = st.slider("How many results to analyze", 20, 400, 150, 10, key="dept_max")
+
+    if st.button("Run department analytic", key="dept_run"):
+        with st.spinner("Fetching and tallying departments…"):
+            rows = department_counts(q=query, max_ids=max_ids)
+
+        if not rows:
+            st.info("No results found (or the API call failed). Try another term.")
+        else:
+            df = pd.DataFrame(rows, columns=["Department", "Count"])
+            # show a quick bar chart + table
+            st.bar_chart(df.set_index("Department"))
+            st.dataframe(df, use_container_width=True)
+
 
 # Footer
 st.markdown("""
