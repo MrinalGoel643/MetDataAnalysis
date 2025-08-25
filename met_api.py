@@ -11,28 +11,45 @@ Need to add error handling
 
 # gets information on a single object
 def get_object(objectID):
-    return requests.get(f"{URL}/objects/{objectID}").json()
+    try:
+        response = requests.get(f"{URL}/objects/{objectID}")
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        print(f"Error fetching object {objectID}: {e}")
+        return None
+
 
 # gets all the objects that have some sort of image
 def get_objectsWithImages():
-    response = requests.get(f"{URL}search?hasImages=true&q=*").json()
-    total = response["total"]
-    objectIDs = response["objectIDs"]
-    return total, objectIDs
+    try:
+        response = requests.get(f"{URL}search?hasImages=true&q=*")
+        response.raise_for_status()
+        data = response.json()
+        total = data.get("total", 0)
+        objectIDs = data.get("objectIDs", [])
+        return total, objectIDs
+    except Exception as e:
+        print(f"Error fetching objects with images: {e}")
+        return 0, []
 
 # gets the urls for random objects with images
 def get_images(totalObjects, objectIDs, limit):
-    images = []
-    # grabbing extra in case a primary image is blank (Works best on small limits)
-    rand_indexes = random.sample(range(totalObjects), limit + 20)
-    for i in rand_indexes:
-        obj = get_object(objectIDs[i])
-        if obj["primaryImage"]:
-            images.append((obj["primaryImage"], obj["title"]))
-        if len(images) == limit:
-            break
+    try:
+        images = []
+        # grabbing extra in case a primary image is blank (Works best on small limits)
+        rand_indexes = random.sample(range(totalObjects), limit + 20)
+        for i in rand_indexes:
+            obj = get_object(objectIDs[i])
+            if obj and obj.get("primaryImage"):
+                images.append((obj["primaryImage"], obj.get("title", "Untitled")))
+            if len(images) == limit:
+                break
 
-    return images
+        return images
+    except Exception as e:
+        print(f"Error in get_images: {e}")
+        return []
 
 def department_counts(q="*", max_ids=200):
     """
@@ -69,10 +86,14 @@ def list_met_departments():
     """
     Return a DataFrame of all Met departments (id + name) to help you choose.
     """
-    r = requests.get(f"{URL}/departments")
-    r.raise_for_status()
-    depts = r.json().get("departments", [])
-    return pd.DataFrame(depts)[["departmentId", "displayName"]]
+    try:
+        r = requests.get(f"{URL}/departments")
+        r.raise_for_status()
+        depts = r.json().get("departments", [])
+        return pd.DataFrame(depts)[["departmentId", "displayName"]]
+    except Exception as e:
+        print(f"Error fetching departments: {e}")
+        return pd.DataFrame(columns=["departmentId", "displayName"])
 
 """
 returns a dataframe of list of objects with images and metadata that matches search term
