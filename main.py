@@ -50,7 +50,6 @@ st.markdown(
 tab1, tab2, tab3 = st.tabs(["Random", "Search and Browse", "Dept Analytics"])
 
 with tab1:
-    st.write("TBD")
     total, ids = cache_objectsWithImages()
     st.write(f"There are {total} images in the Met collection\nHere are 3 random ones for your enjoyment...")
 
