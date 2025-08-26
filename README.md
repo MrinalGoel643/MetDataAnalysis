@@ -2,7 +2,7 @@
 title: Met Data Analysis
 emoji: 📊
 colorFrom: green
-colorTo: lime
+colorTo: blue
 sdk: streamlit
 sdk_version: 1.32.0
 app_file: main.py
