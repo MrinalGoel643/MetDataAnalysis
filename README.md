@@ -1,3 +1,14 @@
+---
+title: Met Data Analysis
+emoji: 📊
+colorFrom: green
+colorTo: lime
+sdk: streamlit
+sdk_version: 1.32.0
+app_file: main.py
+pinned: false
+---
+
 # MetDataAnalysis
 Bootcamp Final Project
 
