@@ -22,3 +22,10 @@ Bootcamp Final Project
 ### Run streamlit app
 `streamlit run main.py`
 
+### Specifics 
+- **Python**: 3.9.6
+- Deployed as a [Hugging Face Space](https://huggingface.co/spaces/mg643/MetDataAnalysis) and automatically synced with GitHub Actions.
+
+  ![GIF](end.gif)
+
+
