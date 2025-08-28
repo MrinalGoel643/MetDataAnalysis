@@ -185,16 +185,22 @@ def search_for_images(query,
     Then searches the department based on input, and displays the results with images.
 """
 def main():
-    print("Welcome to Met Search")
+    print("Welcome to Met Search.")
     departments = list_met_departments()
     print(departments.to_string(index=False))
     random.seed(time.time())
     while True:
-        dept_no = input("Choose a departmentId #: (or enter for all)").strip()
-        if dept_no == '':
+        dept_no = input("Choose a departmentId #: (Type 'q', 'quit' to stop the program, or enter for all) ").strip()
+        if dept_no.lower() in ['q', 'quit']:
+            break
+        elif dept_no == '':
             dept = None
         else:
+            if not dept_no.isdigit():
+                print("Invalid input. Please try again.")
+                continue
             dept = [int(dept_no)]
+
         query = input("Search the Met for: ").strip()
         if query == '':
             print("Please enter a query.")
