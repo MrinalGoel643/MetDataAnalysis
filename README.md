@@ -18,7 +18,6 @@ Browse and analyze Met art collection API
 API document: https://huggingface.co/spaces/mg643/MetDataAnalysis
 
 ## How to run locally
-Use Python 3.13 or higher
 ### Create your virtual environment
 `python3 -m venv venv`
 ### Activate your virtual environment
@@ -27,13 +26,6 @@ Use Python 3.13 or higher
 `pip install -r requirements.txt`
 ### Run streamlit app
 `streamlit run main.py`
-
-### Specifics 
-- **Python**: 3.9.6
-- Deployed as a [Hugging Face Space](https://huggingface.co/spaces/mg643/MetDataAnalysis) and automatically synced with GitHub Actions.
-
-  ![GIF](end.jpg)
-
 
 The application has 3 tabs:
 1. Random - Display 3 random images from the Met collection
@@ -47,5 +39,9 @@ display a table of select results from across the departments, and select one fo
 The CLI will search for images that matches the keyword across selected departments (or all departments).
 The CLI will display a list of departments to choose from (or press enter for all)
 Then it will ask for a search query. It will then display a table of items that matches the query with some details.
-### Use on HuggingFace Spaces
-Browse to: https://huggingface.co/spaces/mg643/MetDataAnalysis
+
+### Specifics 
+- **Python**: 3.9.6
+- Deployed as a [Hugging Face Space](https://huggingface.co/spaces/mg643/MetDataAnalysis) and automatically synced with GitHub Actions.
+
+  ![GIF](end.jpg)
